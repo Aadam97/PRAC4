@@ -83,3 +83,58 @@ def conversion(values):
 	values[2] = (values[2]*3.3)/float(1023)
 	values[2] = (values[2]-0.5)/0.01
 	values[2] = round(values[2],1)
+
+def main():
+	try:
+		global timer
+		
+		# Call initialization
+		GPIO.setmode(GPIO.BCM)
+		init_pushbuttons()
+		init_event_detect()
+		
+		# SPI pin definitions
+		SPICLK=11
+		SPIMISO = 9
+		SPIMOSI = 10
+		SPICS = 8
+		
+		# SPI configuration
+		init_spi(SPIMOSI,SPIMISO,SPICLK,SPICS)
+		mcp = Adafruit_MCP3008.MCP3008(clk=SPICLK, cs=SPICS, mosi=SPIMOSI, miso=SPIMISO)
+		
+		# Coloumn layout
+		print('{:9} {:9} {:6} {:6} {:5}'.format("Time", "Timer", "Pot","Temp","Light"))
+
+		while (True):
+			if (stop_start == True):
+				for i in range(3):
+					values[i]=mcp.read_adc(i)
+				
+				# Converts ADC values
+				conversion(values)
+				
+				current_time =datetime.datetime.now()
+				time_array.append(current_time.strftime('%H:%M:%S'))
+				
+				# Stores current values in array
+				timer_array.append(timer)
+				timer+=sleeptime
+				pot_array.append(values[1])
+				tempre_array.append(values[2])
+				light_array.append(values[0])
+				
+				# Print output values
+				print('{:9} {:<7.2f} {:<3.1f} {:2} {:<3.0f} {:2} {:<3.0f} {:2}'.format(time_array[-1], timer_array[-1], pot_array[-1],"V", tempre_array[-1],"C",light_array[-1], "%"))
+				
+				# Frequency control
+				time.sleep(sleeptime)
+			else:
+				timer += sleeptime
+				time.sleep(sleeptime)
+	except KeyboardInterrupt:
+		GPIO.cleanup()
+	GPIO.cleanup()
+
+if __name__ == '__main__':
+	main()
