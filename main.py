@@ -69,3 +69,17 @@ def init_spi(SPIMOSI, SPIMISO, SPICLK,SPICS):
 	GPIO.setup(SPIMISO, GPIO.IN)
 	GPIO.setup(SPICLK, GPIO.OUT)
 	GPIO.setup(SPICS, GPIO.OUT)
+	
+def conversion(values):
+	#Converts ADC value into LDR light percentage
+	values[0] =(values[0]/float(870))*100
+	values[0] = round(values[0],1)
+	
+	#Converts ADC to Voltage of POT
+	values[1] = (values[1]*3.3/float(1023))
+	values[1] = round(values[1],1)
+	
+	#Converts ADC to Tempreature
+	values[2] = (values[2]*3.3)/float(1023)
+	values[2] = (values[2]-0.5)/0.01
+	values[2] = round(values[2],1)
